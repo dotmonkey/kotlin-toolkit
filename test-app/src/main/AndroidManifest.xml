@@ -203,6 +203,19 @@
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
+
+        <service android:name=".MediaService"
+            android:enabled="true"
+            android:exported="true"
+            android:stopWithTask="true"
+            tools:ignore="ExportedService">
+
+            <intent-filter>
+                <action android:name="androidx.media2.session.MediaSessionService" />
+            </intent-filter>
+        </service>
+
+
     </application>
 
 </manifest>
