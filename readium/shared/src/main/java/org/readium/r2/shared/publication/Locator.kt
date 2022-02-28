@@ -34,11 +34,11 @@ import org.readium.r2.shared.util.logging.log
  */
 @Parcelize
 data class Locator(
-    val href: String,
-    val type: String,
-    val title: String? = null,
-    val locations: Locations = Locations(),
-    val text: Text = Text()
+    var href: String,
+    var type: String,
+    var title: String? = null,
+    var locations: Locations = Locations(),
+    var text: Text = Text()
 ) : JSONable, Parcelable {
 
     /**
@@ -55,7 +55,7 @@ data class Locator(
     @Parcelize
     data class Locations(
         val fragments: List<String> = emptyList(),
-        val progression: Double? = null,
+        var progression: Double? = null,
         val position: Int? = null,
         val totalProgression: Double? = null,
         val otherLocations: @WriteWith<JSONParceler> Map<String, Any> = emptyMap()
@@ -118,9 +118,9 @@ data class Locator(
      */
     @Parcelize
     data class Text(
-        val before: String? = null,
-        val highlight: String? = null,
-        val after: String? = null
+        var before: String? = null,
+        var highlight: String? = null,
+        var after: String? = null
     ) : JSONable, Parcelable {
 
         override fun toJSON() = JSONObject().apply {

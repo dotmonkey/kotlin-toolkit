@@ -13,6 +13,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.PointF
+import android.graphics.Rect
+import android.os.Build
 import android.os.Bundle
 import android.util.Base64
 import android.util.DisplayMetrics
@@ -36,8 +38,11 @@ import org.readium.r2.shared.SCROLL_REF
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.ReadingProgression
+import org.readium.r2.shared.publication.html.domRange
+import org.readium.r2.shared.publication.html.partialCfi
 import java.io.IOException
 import java.io.InputStream
+import kotlin.math.ceil
 import kotlin.math.roundToInt
 
 class R2EpubPageFragment : Fragment() {
@@ -61,7 +66,13 @@ class R2EpubPageFragment : Fragment() {
     private val binding get() = _binding!!
 
     private var isLoading: Boolean = false
-
+    private lateinit var progressRange: ClosedFloatingPointRange<Double>
+    fun getStatusBarHeight(context: Context): Int {
+        val resources = context.resources
+        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
+        return if (resourceId > 0) resources.getDimensionPixelSize(resourceId) else ceil((if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) 24 else 25) * resources.displayMetrics.density)
+            .toInt()
+    }
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val navigatorFragment = parentFragment as EpubNavigatorFragment
@@ -69,6 +80,7 @@ class R2EpubPageFragment : Fragment() {
         containerView = binding.root
         preferences = activity?.getSharedPreferences("org.readium.r2.settings", Context.MODE_PRIVATE)!!
 
+        progressRange = navigatorFragment.progressRange(link!!)
         val webView = binding.webView
         this.webView = webView
 
@@ -77,7 +89,7 @@ class R2EpubPageFragment : Fragment() {
         webView.listener = navigatorFragment.webViewListener
         webView.preferences = preferences
 
-        webView.setScrollMode(preferences.getBoolean(SCROLL_REF, false))
+        //webView.setScrollMode(preferences.getBoolean(SCROLL_REF, false))
         webView.settings.javaScriptEnabled = true
         webView.isVerticalScrollBarEnabled = false
         webView.isHorizontalScrollBarEnabled = false
@@ -127,9 +139,21 @@ class R2EpubPageFragment : Fragment() {
                 return false
             }
 
-            override fun onPageFinished(view: WebView?, url: String?) {
+            override fun onPageFinished(view: WebView, url: String?) {
                 super.onPageFinished(view, url)
+                val window = activity?.window!!
+                val rectangle = Rect()
+                window.decorView.getWindowVisibleDisplayFrame(rectangle)
+                var top = getStatusBarHeight(view.context)
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P){
+                    val cutout = window.decorView.rootWindowInsets?.displayCutout
+                    if(cutout!=null){
+                        top = maxOf(cutout.safeInsetTop)
+                    }
+                }
 
+                updatePadding()
+                webView.evaluateJavascript("endao.setProgressRange(${progressRange.start},${progressRange.endInclusive})"){}
                 webView.listener.onResourceLoaded(link, webView, url)
 
                 // To make sure the page is properly laid out before jumping to the target locator,
@@ -146,6 +170,10 @@ class R2EpubPageFragment : Fragment() {
                         return WebResourceResponse("image/png", null, null)
                     } catch (e: Exception) {
                     }
+                }
+                val cb = navigatorFragment.config.webViewCallback
+                if(cb!=null){
+                    return cb.shouldInterceptRequest(view,request)
                 }
                 return null
             }
@@ -241,7 +269,7 @@ class R2EpubPageFragment : Fragment() {
 
             // Add additional padding to take into account the display cutout, if needed.
             if (
-                android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P &&
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&
                 window.attributes.layoutInDisplayCutoutMode != WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
             ) {
                 // Request the display cutout insets from the decor view because the ones given by
@@ -259,7 +287,10 @@ class R2EpubPageFragment : Fragment() {
                 bottom += margin
             }
 
-            containerView.setPadding(0, top, 0, bottom)
+            var sc = "document.documentElement.style.paddingTop=($top/window.devicePixelRatio)+\"px\";"
+            sc += "document.documentElement.style.paddingBottom=($bottom/window.devicePixelRatio)+\"px\";"
+            webView?.evaluateJavascript(sc){}
+            //containerView.setPadding(0, top, 0, bottom)
         }
     }
 
@@ -282,30 +313,39 @@ class R2EpubPageFragment : Fragment() {
             val webView = requireNotNull(webView)
             webView.visibility = View.VISIBLE
 
-            if (isCurrentResource) {
-                val epubNavigator = requireNotNull(webView.navigator as? EpubNavigatorFragment)
-                val locator = epubNavigator.pendingLocator
-                epubNavigator.pendingLocator = null
-                if (locator != null) {
-                    loadLocator(webView, epubNavigator.readingProgression, locator)
+            val epubNavigator = requireNotNull(webView.navigator as? EpubNavigatorFragment)
+            val locator = epubNavigator.pendingLocator
+            val sch = epubNavigator.pendingSearch
+            if (locator != null) {
+                if(locator.href ==link?.href){
+                    epubNavigator.pendingLocator = null
+                    epubNavigator.pendingSearch = false
+                    loadLocator(webView, epubNavigator.readingProgression, locator,sch)
                 }
-
+            }
+            if (isCurrentResource) {
                 webView.listener.onPageLoaded()
             }
         }
     }
 
-    private suspend fun loadLocator(webView: R2WebView, readingProgression: ReadingProgression, locator: Locator) {
+    private suspend fun loadLocator(webView: R2WebView, readingProgression: ReadingProgression, locator: Locator, sch: Boolean) {
+        val rng = locator.locations.domRange
+        val cfi = locator.locations.partialCfi
+        if(rng!=null || cfi!=null){
+            if (webView.locate(locator,sch)) {
+                return
+            }
+        }
+        val htmlId = locator.locations.htmlId
+        if (htmlId != null && webView.scrollToId(htmlId)) {
+            return
+        }
         val text = locator.text
         if (text.highlight != null) {
             if (webView.scrollToText(text)) {
                 return
             }
-        }
-
-        val htmlId = locator.locations.htmlId
-        if (htmlId != null && webView.scrollToId(htmlId)) {
-            return
         }
 
         var progression = locator.locations.progression

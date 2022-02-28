@@ -66,11 +66,11 @@ internal class HtmlInjector(
         if (endHeadIndex == -1)
             return content
 
-        val layout = ReadiumCssLayout(publication.metadata)
+        //val layout = ReadiumCssLayout(publication.metadata)
 
         val endIncludes = mutableListOf<String>()
         val beginIncludes = mutableListOf<String>()
-        beginIncludes.add(getHtmlLink("/assets/readium-css/${layout.readiumCSSPath}ReadiumCSS-before.css"))
+        //beginIncludes.add(getHtmlLink("/assets/readium-css/${layout.readiumCSSPath}ReadiumCSS-before.css"))
 
         // Fix Readium CSS issue with the positioning of <audio> elements.
         // https://github.com/readium/readium-css/issues/94
@@ -84,8 +84,10 @@ internal class HtmlInjector(
             </style>
         """.trimIndent())
 
-        endIncludes.add(getHtmlLink("/assets/readium-css/${layout.readiumCSSPath}ReadiumCSS-after.css"))
-        endIncludes.add(getHtmlScript("/assets/scripts/readium-reflowable.js"))
+        //endIncludes.add(getHtmlLink("/assets/readium-css/${layout.readiumCSSPath}ReadiumCSS-after.css"))
+        //endIncludes.add(getHtmlScript("/assets/scripts/readium-reflowable.js"))
+        beginIncludes.add(getHtmlLink("/android_asset/endao/css/edstyle.css"))
+        endIncludes.add(getHtmlScript("/android_asset/endao/js/endao-lib.js"))
 
         customResources?.let {
             // Inject all custom resourses
@@ -109,11 +111,12 @@ internal class HtmlInjector(
             resourceHtml = StringBuilder(resourceHtml).insert(endHeadIndex, element).toString()
             endHeadIndex += element.length
         }
-        resourceHtml = StringBuilder(resourceHtml).insert(endHeadIndex, getHtmlFont(fontFamily = "OpenDyslexic", href = "/assets/fonts/OpenDyslexic-Regular.otf")).toString()
-        resourceHtml = StringBuilder(resourceHtml).insert(endHeadIndex, "<style>@import url('https://fonts.googleapis.com/css?family=PT+Serif|Roboto|Source+Sans+Pro|Vollkorn');</style>\n").toString()
+        //resourceHtml = StringBuilder(resourceHtml).insert(endHeadIndex, getHtmlFont(fontFamily = "OpenDyslexic", href = "/assets/fonts/OpenDyslexic-Regular.otf")).toString()
+        //resourceHtml = StringBuilder(resourceHtml).insert(endHeadIndex, "<style>@import url('https://fonts.googleapis.com/css?family=PT+Serif|Roboto|Source+Sans+Pro|Vollkorn');</style>\n").toString()
 
         // Disable the text selection if the publication is protected.
         // FIXME: This is a hack until proper LCP copy is implemented, see https://github.com/readium/r2-testapp-kotlin/issues/266
+        /*
         if (publication.isProtected) {
             resourceHtml = StringBuilder(resourceHtml).insert(endHeadIndex, """
                 <style>
@@ -123,7 +126,7 @@ internal class HtmlInjector(
                 }
                 </style>
             """).toString()
-        }
+        }*/
 
         // Inject userProperties
         getProperties(publication.userSettingsUIPreset)?.let { propertyPair ->

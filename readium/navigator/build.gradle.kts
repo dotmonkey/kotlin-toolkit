@@ -9,7 +9,7 @@ plugins {
     id("kotlin-android")
     id("kotlin-parcelize")
     id("maven-publish")
-    id("org.jetbrains.dokka")
+    id("org.jetbrains.dokka")version "1.6.10"
 }
 
 android {
@@ -41,7 +41,7 @@ android {
         viewBinding = true
     }
 }
-
+/*
 afterEvaluate {
     publishing {
         publications {
@@ -55,11 +55,11 @@ afterEvaluate {
         }
     }
 }
-
+*/
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
-    api(project(":readium:shared"))
+    api(project(":r2-shared"))
 
     implementation("androidx.activity:activity-ktx:1.4.0")
     implementation("androidx.appcompat:appcompat:1.4.1")

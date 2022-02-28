@@ -15,7 +15,7 @@ import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.streamer.fetcher.HtmlInjector
 
-internal class ServingFetcher(
+class ServingFetcher(
     val publication: Publication,
     private val enableReadiumNavigatorSupport: Boolean,
     userPropertiesPath: String?,

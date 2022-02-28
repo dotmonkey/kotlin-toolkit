@@ -17,6 +17,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import androidx.collection.forEach
 import androidx.fragment.app.Fragment
@@ -55,6 +56,20 @@ import org.readium.r2.shared.util.launchWebBrowser
 import kotlin.math.ceil
 import kotlin.reflect.KClass
 
+open class WebViewCallback{
+    open fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse?{
+        return null
+    }
+    open fun onResourceLoaded(link: Link?, webView: R2BasicWebView){
+    }
+    open fun onTtsTap(obj: JSONObject) {
+    }
+    open fun onSearchTap(){}
+
+    open fun handleInteractive(view: R2WebView,event: R2BasicWebView.TapEvent): Boolean{
+        return false
+    }
+}
 /**
  * Navigator for EPUB publications.
  *
@@ -67,7 +82,7 @@ class EpubNavigatorFragment private constructor(
     private val initialLocator: Locator?,
     internal val listener: Listener?,
     internal val paginationListener: PaginationListener?,
-    internal val config: Configuration,
+    val config: Configuration,
 ): Fragment(), CoroutineScope by MainScope(), VisualNavigator, SelectableNavigator, DecorableNavigator {
 
     data class Configuration(
@@ -82,6 +97,7 @@ class EpubNavigatorFragment private constructor(
          * Provide one if you want to customize the selection context menu items.
          */
         var selectionActionModeCallback: ActionMode.Callback? = null,
+        var webViewCallback: WebViewCallback? = null
     )
 
     interface PaginationListener {
@@ -102,7 +118,7 @@ class EpubNavigatorFragment private constructor(
     }
 
     internal lateinit var positionsByReadingOrder: List<List<Locator>>
-    internal lateinit var positions: List<Locator>
+    lateinit var positions: List<Locator>
     lateinit var resourcePager: R2ViewPager
 
     private lateinit var resourcesSingle: List<PageResource>
@@ -111,7 +127,7 @@ class EpubNavigatorFragment private constructor(
     lateinit var preferences: SharedPreferences
     internal lateinit var publicationIdentifier: String
 
-    internal var currentPagerPosition: Int = 0
+    var currentPagerPosition: Int = 0
     internal lateinit var adapter: R2PagerAdapter
     private lateinit var currentActivity: FragmentActivity
 
@@ -121,6 +137,39 @@ class EpubNavigatorFragment private constructor(
 
     private var _binding: ActivityR2ViewpagerBinding? = null
     private val binding get() = _binding!!
+
+    val currentWebView:R2WebView?
+    get() {
+        return currentFragment?.webView
+    }
+    val fragments:List<R2EpubPageFragment>
+    get() {
+        val res = mutableListOf<R2EpubPageFragment>()
+        r2PagerAdapter?.mFragments?.forEach {_, fragment ->
+            val frag = fragment as? R2EpubPageFragment
+            if(frag!=null) res.add(frag)
+        }
+        return res
+    }
+    val webViews:List<R2WebView>
+    get() {
+        return fragments.map { it.webView!! }
+    }
+    fun progressRange(link: Link): ClosedFloatingPointRange<Double> {
+        val idx = publication.readingOrder.indexOf(link)
+        if(idx<0){
+            error("")
+        }
+        val beg = getTotalProgression(idx)
+        var next = 1.0
+        if(idx<publication.readingOrder.size-1){
+            next = getTotalProgression(idx+1)!!
+        }
+        return beg!!.rangeTo(next)
+    }
+    private fun getTotalProgression(idx: Int): Double? {
+        return positionsByReadingOrder[idx][0].locations.totalProgression
+    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -272,6 +321,7 @@ class EpubNavigatorFragment private constructor(
      * Locator waiting to be loaded in the navigator.
      */
     internal var pendingLocator: Locator? = null
+    var pendingSearch = false
 
     override fun go(locator: Locator, animated: Boolean, completion: () -> Unit): Boolean {
         listener?.onJumpToLocator(locator)
@@ -421,7 +471,8 @@ class EpubNavigatorFragment private constructor(
             get() = this@EpubNavigatorFragment.readingProgression
 
         override fun onResourceLoaded(link: Link?, webView: R2BasicWebView, url: String?) {
-            run(viewModel.onResourceLoaded(link, webView))
+            //run(viewModel.onResourceLoaded(link, webView))
+            config.webViewCallback?.onResourceLoaded(link,webView)
         }
 
         override fun onPageLoaded() {
@@ -429,7 +480,11 @@ class EpubNavigatorFragment private constructor(
             paginationListener?.onPageLoaded()
             notifyCurrentLocation()
         }
-
+        override fun handleInteractive( webView: R2WebView,event: R2BasicWebView.TapEvent): Boolean {
+            val cb = config.webViewCallback?:return false
+            return cb.handleInteractive(webView,event)
+            //return InteractiveHandler(webView).handleInteractive(event)
+        }
         override fun onPageChanged(pageIndex: Int, totalPages: Int, url: String) {
             r2Activity?.onPageChanged(pageIndex = pageIndex, totalPages = totalPages, url = url)
             if(paginationListener != null) {

@@ -35,7 +35,7 @@ interface IR2Highlightable {
 data class Highlight(
     val id: String,
     val locator: Locator,
-    val color: Int,
+    var color: Int,
     val style: Style,
     val annotationMarkStyle: String? = null
 )

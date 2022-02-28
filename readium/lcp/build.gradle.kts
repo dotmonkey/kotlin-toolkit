@@ -10,7 +10,7 @@ plugins {
     id("kotlin-parcelize")
     id("kotlin-kapt")
     id("maven-publish")
-    id("org.jetbrains.dokka")
+    id("org.jetbrains.dokka")version "1.6.10"
 }
 
 android {
@@ -37,7 +37,7 @@ android {
         }
     }
 }
-
+/*
 afterEvaluate {
     publishing {
         publications {
@@ -51,13 +51,13 @@ afterEvaluate {
         }
     }
 }
-
+*/
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
 
-    api(project(":readium:shared"))
+    api(project(":r2-shared"))
 
     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
     implementation("androidx.core:core-ktx:1.7.0")

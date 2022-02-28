@@ -172,9 +172,10 @@ data class Metadata(
 
         var language = languages.first().lowercase(Locale.ROOT)
 
+        /*
         if (language == "zh-hant" || language == "zh-tw") {
             return ReadingProgression.RTL
-        }
+        }*/
 
         // The region is ignored for ar, fa and he.
         language = language.split("-", limit = 2).first()

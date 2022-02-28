@@ -33,8 +33,8 @@ internal class CRLService(val network: NetworkService, val context: Context) {
     }
 
     suspend fun retrieve(): String {
-        val (localCRL, isExpired) = readLocal()
-        if (localCRL != null && !isExpired) {
+        val (localCRL, _) = readLocal()
+        if (localCRL != null /*&& !isExpired*/) {
             return localCRL
         }
 
