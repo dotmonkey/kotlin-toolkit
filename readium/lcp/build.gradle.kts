@@ -52,6 +52,13 @@ afterEvaluate {
     }
 }
 */
+kapt {
+    javacOptions {
+        option("--source", "8")
+        option("--target", "8")
+    }
+}
+
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
