@@ -72,6 +72,7 @@ open class WebViewCallback{
 
     open fun handleTextAction(type: String, data: String) {
     }
+    open fun fontSizeChanged(wv:R2WebView){}
 }
 /**
  * Navigator for EPUB publications.
