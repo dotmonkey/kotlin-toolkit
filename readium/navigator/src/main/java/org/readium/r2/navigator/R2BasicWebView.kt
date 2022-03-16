@@ -11,7 +11,6 @@ import android.content.SharedPreferences
 import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.RectF
-import android.net.Uri
 import android.os.Build
 import android.text.Html
 import android.util.AttributeSet
@@ -61,7 +60,7 @@ open class R2BasicWebView(context: Context, attrs: AttributeSet) : WebView(conte
         fun goForward(animated: Boolean = false, completion: () -> Unit = {}): Boolean
         fun goBackward(animated: Boolean = false, completion: () -> Unit = {}): Boolean
         fun handleInteractive(webView: R2WebView,event: TapEvent):Boolean
-
+        open fun handleTextAction(type: String, data: String) {}
         /**
          * Returns the custom [ActionMode.Callback] to be used with the text selection menu.
          */
@@ -218,6 +217,17 @@ open class R2BasicWebView(context: Context, attrs: AttributeSet) : WebView(conte
         }
     }
 
+    enum class TextAction{
+        Mark,
+        Note,
+        Delete,
+        Copy,
+        Share
+    }
+    @JavascriptInterface
+    fun textAction(type:String,data:String){
+        listener.handleTextAction(type,data)
+    }
     @android.webkit.JavascriptInterface
     fun onClick(eventJson: String): Boolean {
         val event = TapEvent.fromJSON(eventJson) ?: return false

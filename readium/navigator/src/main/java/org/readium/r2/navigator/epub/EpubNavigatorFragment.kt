@@ -69,6 +69,9 @@ open class WebViewCallback{
     open fun handleInteractive(view: R2WebView,event: R2BasicWebView.TapEvent): Boolean{
         return false
     }
+
+    open fun handleTextAction(type: String, data: String) {
+    }
 }
 /**
  * Navigator for EPUB publications.
@@ -479,6 +482,11 @@ class EpubNavigatorFragment private constructor(
             r2Activity?.onPageLoaded()
             paginationListener?.onPageLoaded()
             notifyCurrentLocation()
+        }
+
+        override fun handleTextAction(type: String, data: String) {
+            val cb = config.webViewCallback?:return
+            return cb.handleTextAction(type, data)
         }
         override fun handleInteractive( webView: R2WebView,event: R2BasicWebView.TapEvent): Boolean {
             val cb = config.webViewCallback?:return false
