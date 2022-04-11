@@ -6,6 +6,7 @@
 
 package org.readium.r2.navigator.epub
 
+import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.PointF
@@ -73,6 +74,7 @@ open class WebViewCallback{
     open fun handleTextAction(type: String, data: String) {
     }
     open fun fontSizeChanged(wv:R2WebView){}
+    open fun onBookEnd(activity: Activity){}
 }
 /**
  * Navigator for EPUB publications.
@@ -630,6 +632,7 @@ class EpubNavigatorFragment private constructor(
     private fun goToNextResource(animated: Boolean, completion: () -> Unit): Boolean {
         val adapter = resourcePager.adapter ?: return false
         if (resourcePager.currentItem >= adapter.count - 1) {
+            config.webViewCallback?.onBookEnd(requireActivity())
             return false
         }
 
@@ -737,7 +740,13 @@ class EpubNavigatorFragment private constructor(
 
         fulfill(publication.tableOfContents).toMap()
     }
-
+    suspend fun updatePosition(loc: Locator): Locator {
+        val json = currentWebView!!.runJavaScriptSuspend("endao.currentPosition()")
+        val o = JSONObject(json)
+        val oo = Locator.Locations.fromJSON(o)
+        val locations = loc.locations.copy(otherLocations = oo.otherLocations)
+        return loc.copy(locations = locations)
+    }
     private fun notifyCurrentLocation() {
         val navigator = this
         debounceLocationNotificationJob?.cancel()
@@ -769,9 +778,10 @@ class EpubNavigatorFragment private constructor(
             if (locator == _currentLocator.value) {
                 return@launch
             }
+            val real = updatePosition(locator)
 
-            _currentLocator.value = locator
-            navigatorDelegate?.locationDidChange(navigator = navigator, locator = locator)
+            _currentLocator.value = real
+            navigatorDelegate?.locationDidChange(navigator = navigator, locator = real)
         }
     }
 
