@@ -29,6 +29,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.webkit.WebViewClientCompat
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import org.readium.r2.navigator.R
 import org.readium.r2.navigator.R2BasicWebView
 import org.readium.r2.navigator.R2WebView
@@ -38,6 +39,7 @@ import org.readium.r2.navigator.extensions.htmlId
 import org.readium.r2.shared.SCROLL_REF
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
+import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.publication.ReadingProgression
 import org.readium.r2.shared.publication.html.domRange
 import org.readium.r2.shared.publication.html.partialCfi
@@ -78,7 +80,27 @@ fun getLocaleName(locale: Locale): String {
     }
     return res
 }
-
+fun Link.getTitle(h:String): String? {
+    for(ch in children){
+        val t = ch.getTitle(h)
+        if(t!=null) {
+            return t
+        }
+    }
+    if(href?.substringBefore('#')==h) return title
+    return null
+}
+fun Publication.getTitle(href:String?): String? {
+    if(href==null) return null
+    val file = href.substringBefore('#')
+    for(l in tableOfContents){
+        val t = l.getTitle(file)
+        if(t!=null) {
+            return t
+        }
+    }
+    return null
+}
 class R2EpubPageFragment : Fragment() {
 
     private val resourceUrl: String?
@@ -93,6 +115,12 @@ class R2EpubPageFragment : Fragment() {
     var webView: R2WebView? = null
         private set
 
+    val chapterTitle:String
+    get() {
+        val navigatorFragment = parentFragment as EpubNavigatorFragment
+        val pub = navigatorFragment.publication
+        return pub.getTitle(link!!.href) ?: ""
+    }
     private lateinit var containerView: View
     private lateinit var preferences: SharedPreferences
 
@@ -187,15 +215,21 @@ class R2EpubPageFragment : Fragment() {
                 }
 
                 updatePadding()
-                webView.evaluateJavascript("endao.setProgressRange(${progressRange.start},${progressRange.endInclusive})"){}
-                val loc = ConfigurationCompat.getLocales(resources.configuration)[0]
-                val language = getLocaleName(loc)
-                webView.evaluateJavascript("endao.uiLanguage = \"$language\";"){}
+                //webView.evaluateJavascript("endao.setProgressRange(${progressRange.start},${progressRange.endInclusive})"){}
                 webView.listener.onResourceLoaded(link, webView, url)
 
+                val loc = ConfigurationCompat.getLocales(resources.configuration)[0]
+                val obj = JSONObject()
+                obj.put("chapterTitle", chapterTitle)
+                obj.put("language", getLocaleName(loc))
+                obj.put("progressStart", progressRange.start)
+                obj.put("progressEnd", progressRange.endInclusive)
+                val json = obj.toString(0)
                 // To make sure the page is properly laid out before jumping to the target locator,
                 // we execute a dummy JavaScript and wait for the callback result.
+
                 webView.evaluateJavascript("true") {
+                    webView.evaluateJavascript("endao.onload($json);"){}
                     onLoadPage()
                 }
             }
