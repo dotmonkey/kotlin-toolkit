@@ -22,6 +22,7 @@ import android.view.*
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
+import androidx.core.os.ConfigurationCompat
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -42,8 +43,41 @@ import org.readium.r2.shared.publication.html.domRange
 import org.readium.r2.shared.publication.html.partialCfi
 import java.io.IOException
 import java.io.InputStream
+import java.util.*
 import kotlin.math.ceil
 import kotlin.math.roundToInt
+
+fun getLocaleName(locale: Locale): String {
+    var script = locale.script
+    if(script.isEmpty()){
+        when(locale.country){
+            "SG",
+            "CHS",
+            "CN"->{
+                script = "Hans"
+            }
+            "MO",
+            "HK",
+            "CHT",
+            "TW"->{
+                script = "Hant"
+            }
+        }
+    }
+    var res = "${locale.language}_${script}"
+
+    when(locale.language){
+        "zh"->{
+        }
+        "en"->{
+            res = "en"
+        }
+        else->{
+            res = "zh_Hans"
+        }
+    }
+    return res
+}
 
 class R2EpubPageFragment : Fragment() {
 
@@ -154,6 +188,9 @@ class R2EpubPageFragment : Fragment() {
 
                 updatePadding()
                 webView.evaluateJavascript("endao.setProgressRange(${progressRange.start},${progressRange.endInclusive})"){}
+                val loc = ConfigurationCompat.getLocales(resources.configuration)[0]
+                val language = getLocaleName(loc)
+                webView.evaluateJavascript("endao.uiLanguage = \"$language\";"){}
                 webView.listener.onResourceLoaded(link, webView, url)
 
                 // To make sure the page is properly laid out before jumping to the target locator,
