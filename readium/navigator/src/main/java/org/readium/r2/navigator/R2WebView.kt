@@ -664,6 +664,11 @@ class R2WebView(context: Context, attrs: AttributeSet) : R2BasicWebView(context,
         }
     }
 
+    private var longPressed = false
+    private val mLongPressed = Runnable {
+        longPressed = true
+    }
+    private val longPressTimeout = ViewConfiguration.getLongPressTimeout().toLong()
     override fun onTouchEvent(ev: MotionEvent): Boolean {
 
         if (mVelocityTracker == null) {
@@ -672,6 +677,22 @@ class R2WebView(context: Context, attrs: AttributeSet) : R2BasicWebView(context,
         mVelocityTracker?.addMovement(ev)
 
         val action = ev.action
+        when(ev.actionMasked){
+            MotionEvent.ACTION_DOWN->{
+                longPressed = false
+                postDelayed(mLongPressed, longPressTimeout)
+            }
+            MotionEvent.ACTION_MOVE->{
+                val activePointerIndex = ev.findPointerIndex(mActivePointerId)
+                val x = ev.getX(activePointerIndex)
+                val dx = x - mLastMotionX
+                if(dx>mGutterSize){
+                    removeCallbacks(mLongPressed)
+                }
+            }else->{
+               removeCallbacks(mLongPressed)
+            }
+        }
         when (action and MotionEvent.ACTION_MASK) {
 
             MotionEvent.ACTION_DOWN -> {
@@ -700,7 +721,7 @@ class R2WebView(context: Context, attrs: AttributeSet) : R2BasicWebView(context,
                     val xDiff = abs(x - mLastMotionX)
                     if (DEBUG) Timber.v("Moved x to $x diff=$xDiff")
 
-                    if (xDiff > mTouchSlop) {
+                    if (xDiff > mTouchSlop && !longPressed) {
                         if (DEBUG) Timber.v("Starting drag!")
                         mIsBeingDragged = true
                         mLastMotionX = if (x - mInitialMotionX > 0)
