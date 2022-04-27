@@ -330,9 +330,10 @@ open class R2BasicWebView(context: Context, attrs: AttributeSet) : WebView(conte
         companion object {
             fun fromJSONObject(obj: JSONObject?): TapEvent? {
                 obj ?: return null
+                val pixelRatio = obj.optDouble("pixelRatio").toFloat()
+                val x = obj.optDouble("x").toFloat()*pixelRatio
+                val y = obj.optDouble("y").toFloat()*pixelRatio
 
-                val x = obj.optDouble("x").toFloat()
-                val y = obj.optDouble("y").toFloat()
 
                 return TapEvent(
                     defaultPrevented = obj.optBoolean("defaultPrevented"),
