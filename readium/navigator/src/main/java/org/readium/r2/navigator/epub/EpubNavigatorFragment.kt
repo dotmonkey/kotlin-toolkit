@@ -73,6 +73,7 @@ open class WebViewCallback{
 
     open fun handleTextAction(type: String, data: String) {
     }
+    open fun fullscreen(){}
     open fun fontSizeChanged(wv:R2WebView){}
     open fun onBookEnd(activity: Activity){}
 }
@@ -487,6 +488,10 @@ class EpubNavigatorFragment private constructor(
             notifyCurrentLocation()
         }
 
+        override fun fullscreen() {
+            val cb = config.webViewCallback?:return
+            cb.fullscreen()
+        }
         override fun handleTextAction(type: String, data: String) {
             val cb = config.webViewCallback?:return
             return cb.handleTextAction(type, data)

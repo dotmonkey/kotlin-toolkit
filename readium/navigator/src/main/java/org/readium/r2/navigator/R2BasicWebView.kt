@@ -61,6 +61,7 @@ open class R2BasicWebView(context: Context, attrs: AttributeSet) : WebView(conte
         fun goBackward(animated: Boolean = false, completion: () -> Unit = {}): Boolean
         fun handleInteractive(webView: R2WebView,event: TapEvent):Boolean
         open fun handleTextAction(type: String, data: String) {}
+        open fun fullscreen()
         /**
          * Returns the custom [ActionMode.Callback] to be used with the text selection menu.
          */
@@ -227,6 +228,12 @@ open class R2BasicWebView(context: Context, attrs: AttributeSet) : WebView(conte
     @JavascriptInterface
     fun textAction(type:String,data:String){
         listener.handleTextAction(type,data)
+    }
+    @JavascriptInterface
+    fun fullscreen(){
+        uiScope.launch {
+            listener.fullscreen()
+        }
     }
     @android.webkit.JavascriptInterface
     fun onClick(eventJson: String): Boolean {
