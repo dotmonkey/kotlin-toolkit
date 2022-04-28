@@ -479,7 +479,7 @@ class EpubNavigatorFragment private constructor(
 
         override fun onResourceLoaded(link: Link?, webView: R2BasicWebView, url: String?) {
             //run(viewModel.onResourceLoaded(link, webView))
-            config.webViewCallback?.onResourceLoaded(link,webView)
+            webViewCallback?.onResourceLoaded(link,webView)
         }
 
         override fun onPageLoaded() {
@@ -488,19 +488,6 @@ class EpubNavigatorFragment private constructor(
             notifyCurrentLocation()
         }
 
-        override fun fullscreen() {
-            val cb = config.webViewCallback?:return
-            cb.fullscreen()
-        }
-        override fun handleTextAction(type: String, data: String) {
-            val cb = config.webViewCallback?:return
-            return cb.handleTextAction(type, data)
-        }
-        override fun handleInteractive( webView: R2WebView,event: R2BasicWebView.TapEvent): Boolean {
-            val cb = config.webViewCallback?:return false
-            return cb.handleInteractive(webView,event)
-            //return InteractiveHandler(webView).handleInteractive(event)
-        }
         override fun onPageChanged(pageIndex: Int, totalPages: Int, url: String) {
             r2Activity?.onPageChanged(pageIndex = pageIndex, totalPages = totalPages, url = url)
             if(paginationListener != null) {
@@ -634,10 +621,14 @@ class EpubNavigatorFragment private constructor(
         return true
     }
 
+    val webViewCallback:WebViewCallback?
+    get() {
+        return config.webViewCallback
+    }
     private fun goToNextResource(animated: Boolean, completion: () -> Unit): Boolean {
         val adapter = resourcePager.adapter ?: return false
         if (resourcePager.currentItem >= adapter.count - 1) {
-            config.webViewCallback?.onBookEnd(requireActivity())
+            webViewCallback?.onBookEnd(requireActivity())
             return false
         }
 

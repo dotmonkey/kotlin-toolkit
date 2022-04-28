@@ -144,6 +144,8 @@ class R2EpubPageFragment : Fragment() {
 
         progressRange = navigatorFragment.progressRange(link!!)
         val webView = binding.webView
+        val cb = navigatorFragment.config.webViewCallback
+        webView.webViewCallback = cb
         this.webView = webView
 
         webView.visibility = View.INVISIBLE
@@ -242,7 +244,6 @@ class R2EpubPageFragment : Fragment() {
                     } catch (e: Exception) {
                     }
                 }
-                val cb = navigatorFragment.config.webViewCallback
                 if(cb!=null){
                     return cb.shouldInterceptRequest(view,request)
                 }

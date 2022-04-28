@@ -17,6 +17,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Interpolator
+import android.webkit.JavascriptInterface
 import android.widget.EdgeEffect
 import android.widget.Scroller
 import androidx.annotation.CallSuper
@@ -26,8 +27,9 @@ import androidx.core.view.WindowInsetsCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.readium.r2.navigator.BuildConfig.DEBUG
-import org.readium.r2.shared.SCROLL_REF
+import org.readium.r2.navigator.epub.WebViewCallback
 import timber.log.Timber
 import kotlin.math.*
 
@@ -36,13 +38,60 @@ import kotlin.math.*
  */
 
 class R2WebView(context: Context, attrs: AttributeSet) : R2BasicWebView(context, attrs) {
-
+    var webViewCallback: WebViewCallback? = null
     init {
         initWebPager()
     }
 
     private val uiScope = CoroutineScope(Dispatchers.Main)
+    @JavascriptInterface
+    fun fullscreen(){
+        uiScope.launch {
+            webViewCallback?.fullscreen()
+        }
+    }
+    enum class TextAction{
+        Mark,
+        Note,
+        Delete,
+        Copy,
+        Share
+    }
+    @JavascriptInterface
+    fun textAction(type:String,data:String){
+        webViewCallback?.handleTextAction(type,data)
+    }
 
+    @android.webkit.JavascriptInterface
+    fun onClick(eventJson: String): Boolean {
+        val event = TapEvent.fromJSON(eventJson) ?: return false
+        if (event.defaultPrevented) {
+            return false
+        }
+
+        if (event.interactiveElement != null || event.data!=null) {
+            webViewCallback?.handleInteractive(this,event)
+            return true
+        }
+        // Skips to previous/next pages if the tap is on the content edges.
+        val clientWidth = computeHorizontalScrollExtent()
+        val thresholdRange = 0.0..(0.2 * clientWidth)
+
+        // FIXME: Call listener.onTap if scrollLeft|Right fails
+        return when {
+            thresholdRange.contains(event.point.x) -> {
+                scrollLeft(false)
+                true
+            }
+            thresholdRange.contains(clientWidth - event.point.x) -> {
+                scrollRight(false)
+                true
+            }
+            else ->
+                runBlocking(uiScope.coroutineContext) { listener.onTap(event.point) }
+        }
+        return false
+    }
     @android.webkit.JavascriptInterface
     override fun scrollRight(animated: Boolean) {
         super.scrollRight(animated)

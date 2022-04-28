@@ -59,9 +59,6 @@ open class R2BasicWebView(context: Context, attrs: AttributeSet) : WebView(conte
         fun onHighlightAnnotationMarkActivated(id: String)
         fun goForward(animated: Boolean = false, completion: () -> Unit = {}): Boolean
         fun goBackward(animated: Boolean = false, completion: () -> Unit = {}): Boolean
-        fun handleInteractive(webView: R2WebView,event: TapEvent):Boolean
-        open fun handleTextAction(type: String, data: String) {}
-        open fun fullscreen()
         /**
          * Returns the custom [ActionMode.Callback] to be used with the text selection menu.
          */
@@ -218,54 +215,6 @@ open class R2BasicWebView(context: Context, attrs: AttributeSet) : WebView(conte
         }
     }
 
-    enum class TextAction{
-        Mark,
-        Note,
-        Delete,
-        Copy,
-        Share
-    }
-    @JavascriptInterface
-    fun textAction(type:String,data:String){
-        listener.handleTextAction(type,data)
-    }
-    @JavascriptInterface
-    fun fullscreen(){
-        uiScope.launch {
-            listener.fullscreen()
-        }
-    }
-    @android.webkit.JavascriptInterface
-    fun onClick(eventJson: String): Boolean {
-        val event = TapEvent.fromJSON(eventJson) ?: return false
-        if (event.defaultPrevented) {
-            return false
-        }
-
-        if (event.interactiveElement != null || event.data!=null) {
-            if(listener.handleInteractive(this as R2WebView,event)){
-                return true
-            }
-        }
-        // Skips to previous/next pages if the tap is on the content edges.
-        val clientWidth = computeHorizontalScrollExtent()
-        val thresholdRange = 0.0..(0.2 * clientWidth)
-
-        // FIXME: Call listener.onTap if scrollLeft|Right fails
-        return when {
-            thresholdRange.contains(event.point.x) -> {
-                scrollLeft(false)
-                true
-            }
-            thresholdRange.contains(clientWidth - event.point.x) -> {
-                scrollRight(false)
-                true
-            }
-            else ->
-                runBlocking(uiScope.coroutineContext) { listener.onTap(event.point) }
-        }
-        return false
-    }
     /**
      * Called from the JS code when a tap is detected.
      * If the JS indicates the tap is being handled within the web view, don't take action,
