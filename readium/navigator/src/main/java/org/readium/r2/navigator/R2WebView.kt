@@ -59,7 +59,9 @@ class R2WebView(context: Context, attrs: AttributeSet) : R2BasicWebView(context,
     }
     @JavascriptInterface
     fun textAction(type:String,data:String){
-        webViewCallback?.handleTextAction(type,data)
+        uiScope.launch {
+            webViewCallback?.handleTextAction(type,data)
+        }
     }
 
     @android.webkit.JavascriptInterface
@@ -70,7 +72,9 @@ class R2WebView(context: Context, attrs: AttributeSet) : R2BasicWebView(context,
         }
 
         if (event.interactiveElement != null || event.data!=null) {
-            webViewCallback?.handleInteractive(this,event)
+            uiScope.launch {
+                webViewCallback?.handleInteractive(this@R2WebView, event)
+            }
             return true
         }
         // Skips to previous/next pages if the tap is on the content edges.
