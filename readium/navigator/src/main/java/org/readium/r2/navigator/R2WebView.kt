@@ -616,7 +616,7 @@ class R2WebView(context: Context, attrs: AttributeSet) : R2BasicWebView(context,
 
     private fun pageScrolled(xpos: Int): Boolean {
         val width = getClientWidth() ?: return false
-
+        evaluateJavascript("endao.endTextSelection()",null)
         val ii = infoForCurrentScrollPosition()
         val widthWithMargin = width + mPageMargin
         val marginOffset = mPageMargin.toFloat() / width
