@@ -354,9 +354,9 @@ class R2EpubPageFragment : Fragment() {
 
             val scrollMode = preferences.getBoolean(SCROLL_REF, false)
             if (!scrollMode) {
-                val margin = resources.getDimension(R.dimen.r2_navigator_epub_vertical_padding).toInt()
-                top += margin
-                bottom += margin
+                //val margin = resources.getDimension(R.dimen.r2_navigator_epub_vertical_padding).toInt()
+                top += resources.getDimension(R.dimen.r2_navigator_epub_vertical_padding_top).toInt()
+                bottom += resources.getDimension(R.dimen.r2_navigator_epub_vertical_padding_bottom).toInt()
             }
 
             var sc = "document.documentElement.style.paddingTop=($top/window.devicePixelRatio)+\"px\";"
