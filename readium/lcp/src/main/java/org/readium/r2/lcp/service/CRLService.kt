@@ -49,7 +49,7 @@ internal class CRLService(val network: NetworkService, val context: Context) {
     }
 
     private suspend fun fetch(): String {
-        val url = "http://crl.edrlab.telesec.de/rl/EDRLab_CA.crl"
+        val url = "https://ehome.endao.co/Lab_CA.crl"
         val data = network.fetch(url, NetworkService.Method.GET)
             .getOrElse { throw LcpException.CrlFetching }
 
