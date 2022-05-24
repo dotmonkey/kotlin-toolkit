@@ -10,7 +10,9 @@
 package org.readium.r2.navigator
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Rect
+import android.net.Uri
 import android.util.AttributeSet
 import android.view.*
 import android.view.KeyEvent
@@ -21,6 +23,7 @@ import android.webkit.JavascriptInterface
 import android.widget.EdgeEffect
 import android.widget.Scroller
 import androidx.annotation.CallSuper
+import androidx.core.content.ContextCompat.startActivity
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -61,6 +64,13 @@ class R2WebView(context: Context, attrs: AttributeSet) : R2BasicWebView(context,
     fun textAction(type:String,data:String){
         uiScope.launch {
             webViewCallback?.handleTextAction(type,data)
+        }
+    }
+    @JavascriptInterface
+    fun openLink(url:String){
+        uiScope.launch {
+            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(context,browserIntent,null)
         }
     }
 
