@@ -46,6 +46,7 @@ import org.readium.r2.shared.publication.html.partialCfi
 import java.io.IOException
 import java.io.InputStream
 import java.util.*
+import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
@@ -135,6 +136,15 @@ class R2EpubPageFragment : Fragment() {
         return if (resourceId > 0) resources.getDimensionPixelSize(resourceId) else ceil((if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) 24 else 25) * resources.displayMetrics.density)
             .toInt()
     }
+    fun layoutParam(): String {
+        val obj = JSONObject()
+        val loc = ConfigurationCompat.getLocales(resources.configuration)[0]
+        obj.put("chapterTitle", chapterTitle)
+        obj.put("language", getLocaleName(loc))
+        obj.put("progressStart", progressRange.start)
+        obj.put("progressEnd", progressRange.endInclusive)
+        return obj.toString(0)
+    }
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val navigatorFragment = parentFragment as EpubNavigatorFragment
@@ -220,6 +230,7 @@ class R2EpubPageFragment : Fragment() {
                 //webView.evaluateJavascript("endao.setProgressRange(${progressRange.start},${progressRange.endInclusive})"){}
                 webView.listener.onResourceLoaded(link, webView, url)
 
+                /*
                 val loc = ConfigurationCompat.getLocales(resources.configuration)[0]
                 val obj = JSONObject()
                 obj.put("chapterTitle", chapterTitle)
@@ -227,6 +238,8 @@ class R2EpubPageFragment : Fragment() {
                 obj.put("progressStart", progressRange.start)
                 obj.put("progressEnd", progressRange.endInclusive)
                 val json = obj.toString(0)
+                */
+                val json = layoutParam()
                 // To make sure the page is properly laid out before jumping to the target locator,
                 // we execute a dummy JavaScript and wait for the callback result.
 
