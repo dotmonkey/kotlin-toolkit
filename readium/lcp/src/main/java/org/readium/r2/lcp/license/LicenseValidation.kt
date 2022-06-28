@@ -365,6 +365,20 @@ internal class LicenseValidation(
                 }
             }
         }
+        //处理revoked等状态不生效问题 #369
+        val date = status?.statusUpdated
+        error = when(status?.status){
+            StatusDocument.Status.expired->{
+                LcpException.LicenseStatus.Expired(end)
+            }
+            StatusDocument.Status.returned -> LcpException.LicenseStatus.Returned(date!!)
+            StatusDocument.Status.revoked->{
+                val devicesCount = status.events(org.readium.r2.lcp.license.model.components.lsd.Event.EventType.register).size
+                LcpException.LicenseStatus.Revoked(date!!, devicesCount = devicesCount)
+            }
+            StatusDocument.Status.cancelled -> LcpException.LicenseStatus.Cancelled(date!!)
+            else->error
+        }
         raise(Event.checkedLicenseStatus(error))
     }
 
