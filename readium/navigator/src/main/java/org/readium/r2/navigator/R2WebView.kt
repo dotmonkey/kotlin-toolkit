@@ -731,6 +731,11 @@ class R2WebView(context: Context, attrs: AttributeSet) : R2BasicWebView(context,
     private val mLongPressed = Runnable {
         longPressed = true
     }
+    private var _scrollingNote = false
+    @JavascriptInterface
+    fun setScrollingNote(){
+        _scrollingNote = true
+    }
     private val longPressTimeout = ViewConfiguration.getLongPressTimeout().toLong()
     override fun onTouchEvent(ev: MotionEvent): Boolean {
 
@@ -742,6 +747,7 @@ class R2WebView(context: Context, attrs: AttributeSet) : R2BasicWebView(context,
         val action = ev.action
         when(ev.actionMasked){
             MotionEvent.ACTION_DOWN->{
+                _scrollingNote = false
                 longPressed = false
                 postDelayed(mLongPressed, longPressTimeout)
             }
@@ -771,7 +777,7 @@ class R2WebView(context: Context, attrs: AttributeSet) : R2BasicWebView(context,
                 mActivePointerId = ev.getPointerId(0)
             }
             MotionEvent.ACTION_MOVE -> {
-                evaluateJavascript("endao.closeFootnote()"){}
+                //evaluateJavascript("endao.closeFootnote()"){}
                 if ((mLastMotionX > (width - mGutterSize)) || (mLastMotionX < mGutterSize)) {
                     requestDisallowInterceptTouchEvent(true)
                     return false
@@ -797,7 +803,7 @@ class R2WebView(context: Context, attrs: AttributeSet) : R2BasicWebView(context,
                 }
             }
             MotionEvent.ACTION_UP -> when {
-                mIsBeingDragged -> {
+                mIsBeingDragged && !_scrollingNote -> {
                     mIsBeingDragged = false
                     mHasAbortedScroller = false
 

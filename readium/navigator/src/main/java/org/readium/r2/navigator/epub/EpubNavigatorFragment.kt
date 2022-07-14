@@ -490,6 +490,7 @@ class EpubNavigatorFragment private constructor(
 
         override fun onPageChanged(pageIndex: Int, totalPages: Int, url: String) {
             r2Activity?.onPageChanged(pageIndex = pageIndex, totalPages = totalPages, url = url)
+            currentWebView?.evaluateJavascript("endao.closeFootnote()"){}
             if(paginationListener != null) {
                 // Find current locator
                 val resource = publication.readingOrder[resourcePager.currentItem]
