@@ -9,6 +9,7 @@ package org.readium.r2.navigator.epub
 import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import android.graphics.PointF
 import android.graphics.RectF
 import android.net.Uri
@@ -39,6 +40,7 @@ import org.readium.r2.navigator.extensions.positionsByResource
 import org.readium.r2.navigator.extensions.withBaseUrl
 import org.readium.r2.navigator.html.HtmlDecorationTemplates
 import org.readium.r2.navigator.pager.R2EpubPageFragment
+import org.readium.r2.navigator.pager.R2FXLPageFragment
 import org.readium.r2.navigator.pager.R2PagerAdapter
 import org.readium.r2.navigator.pager.R2PagerAdapter.PageResource
 import org.readium.r2.navigator.pager.R2ViewPager
@@ -145,9 +147,9 @@ class EpubNavigatorFragment private constructor(
     private var _binding: ActivityR2ViewpagerBinding? = null
     private val binding get() = _binding!!
 
-    val currentWebView:R2WebView?
+    val currentWebView:R2BasicWebView?
     get() {
-        return currentFragment?.webView
+        return currentFragment?.webView ?: currentFXLFragment?.webViews?.get(0)
     }
     val fragments:List<R2EpubPageFragment>
     get() {
@@ -249,6 +251,12 @@ class EpubNavigatorFragment private constructor(
                 this.resourcesDouble = resourcesDouble
 
                 resourcePager.type = Publication.TYPE.FXL
+                adapter = if(landscape){
+                    R2PagerAdapter(childFragmentManager, resourcesDouble)
+                }else{
+                    R2PagerAdapter(childFragmentManager, resourcesSingle)
+                }
+                /*
                 adapter = when (preferences.getInt(COLUMN_COUNT_REF, 0)) {
                     1 -> {
                         R2PagerAdapter(childFragmentManager, resourcesSingle)
@@ -261,7 +269,7 @@ class EpubNavigatorFragment private constructor(
                         // TODO decide if 1 page or 2 page
                         R2PagerAdapter(childFragmentManager, resourcesSingle)
                     }
-                }
+                }*/
             }
         }
 
@@ -365,6 +373,12 @@ class EpubNavigatorFragment private constructor(
             setCurrent(resourcesSingle)
         } else {
 
+            if(landscape){
+                setCurrent(resourcesDouble)
+            }else{
+                setCurrent(resourcesSingle)
+            }
+            /*
             when (preferences.getInt(COLUMN_COUNT_REF, 0)) {
                 1 -> {
                     setCurrent(resourcesSingle)
@@ -377,10 +391,15 @@ class EpubNavigatorFragment private constructor(
                     // TODO decide if 1 page or 2 page
                     setCurrent(resourcesSingle)
                 }
-            }
+            }*/
         }
 
         return true
+    }
+    val landscape:Boolean
+    get() {
+        //return true
+        return resources.configuration.orientation== android.content.res.Configuration.ORIENTATION_LANDSCAPE
     }
 
     override fun go(link: Link, animated: Boolean, completion: () -> Unit): Boolean {
@@ -683,6 +702,10 @@ class EpubNavigatorFragment private constructor(
             adapter.mFragments.get(adapter.getItemId(resourcePager.currentItem)) as? R2EpubPageFragment
         }
 
+    val currentFXLFragment:R2FXLPageFragment? get() =
+    r2PagerAdapter?.let { adapter ->
+        adapter.mFragments.get(adapter.getItemId(resourcePager.currentItem)) as? R2FXLPageFragment
+    }
     /**
      * Returns the reflowable page fragment matching the given href, if it is already loaded in the
      * view pager.

@@ -20,8 +20,6 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import androidx.fragment.app.Fragment
 import androidx.webkit.WebViewClientCompat
-import org.readium.r2.navigator.Navigator
-import org.readium.r2.navigator.R
 import org.readium.r2.navigator.R2BasicWebView
 import org.readium.r2.navigator.databinding.FragmentFxllayoutDoubleBinding
 import org.readium.r2.navigator.databinding.FragmentFxllayoutSingleBinding
@@ -37,7 +35,7 @@ class R2FXLPageFragment : Fragment() {
     private val secondResourceUrl: String?
         get() = requireArguments().getString("secondUrl")
 
-    private var webViews = mutableListOf<WebView>()
+    var webViews = mutableListOf<R2BasicWebView>()
 
     private var _doubleBinding: FragmentFxllayoutDoubleBinding? = null
     private val doubleBinding get() = _doubleBinding!!
@@ -126,13 +124,13 @@ class R2FXLPageFragment : Fragment() {
         webView.settings.setSupportZoom(true)
         webView.settings.builtInZoomControls = true
         webView.settings.displayZoomControls = false
-
+        webView.resourceUrl = resourceUrl
         webView.setInitialScale(1)
 
         webView.setPadding(0, 0, 0, 0)
         webView.addJavascriptInterface(webView, "Android")
-
-
+        val navigatorFragment = parentFragment as EpubNavigatorFragment
+        val cb = navigatorFragment.config.webViewCallback
         webView.webViewClient = object : WebViewClientCompat() {
 
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean =
@@ -146,9 +144,26 @@ class R2FXLPageFragment : Fragment() {
                     } catch (e: Exception) {
                     }
                 }
+
+                if(cb!=null){
+                    return cb.shouldInterceptRequest(view,request)
+                }
                 return null
             }
 
+            override fun onPageFinished(view: WebView, url: String?) {
+                var  p = view.parent
+                while(p!=null){
+                    if(p is R2FXLLayout){
+                        val col = webViews.size
+                        view.evaluateJavascript("endao.updateScale(${p.width/col},${p.height})"){
+                        }
+                        break
+                    }
+                    p = p.parent
+                }
+                webView.listener.onResourceLoaded(null, webView, url)
+            }
         }
         webView.isHapticFeedbackEnabled = false
         webView.isLongClickable = false

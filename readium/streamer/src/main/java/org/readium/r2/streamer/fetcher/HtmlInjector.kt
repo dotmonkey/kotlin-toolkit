@@ -185,7 +185,9 @@ internal class HtmlInjector(
         if (endHeadIndex == -1)
             return content
         val includes = mutableListOf<String>()
-        includes.add(getHtmlScript("/assets/scripts/readium-fixed.js"))
+        //includes.add(getHtmlScript("/assets/scripts/readium-fixed.js"))
+        //includes.add(getHtmlLink("/android_asset/endao/css/edstyle.css"))
+        includes.add(getHtmlScript("/android_asset/endao/js/endao-fixed.js"))
         for (element in includes) {
             resourceHtml = StringBuilder(resourceHtml).insert(endHeadIndex, element).toString()
         }
