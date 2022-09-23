@@ -26,6 +26,8 @@ import org.readium.r2.navigator.databinding.FragmentFxllayoutSingleBinding
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
 import org.readium.r2.navigator.epub.fxl.R2FXLLayout
 import org.readium.r2.navigator.epub.fxl.R2FXLOnDoubleTapListener
+import org.readium.r2.navigator.goLeft
+import org.readium.r2.navigator.goRight
 
 class R2FXLPageFragment : Fragment() {
 
@@ -43,6 +45,22 @@ class R2FXLPageFragment : Fragment() {
     private var _singleBinding: FragmentFxllayoutSingleBinding? = null
     private val singleBinding get() = _singleBinding!!
 
+    fun onTap(pos: PointF): Boolean {
+        val navigator = parentFragment as EpubNavigatorFragment
+        val w = requireView().width
+        //println("web_debug click onTap (${pos.x},${pos.y}) width=$w")
+        if(pos.x< w*0.2f){
+            //println("click left")
+            navigator.goLeft()
+            return true
+        }else if(pos.x>0.8f*w){
+            //println("click right")
+            navigator.goRight()
+            return true
+        }else{
+            return false
+        }
+    }
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
@@ -63,6 +81,7 @@ class R2FXLPageFragment : Fragment() {
             r2FXLLayout.addOnDoubleTapListener(R2FXLOnDoubleTapListener(true))
             r2FXLLayout.addOnTapListener(object : R2FXLLayout.OnTapListener {
                 override fun onTap(view: R2FXLLayout, info: R2FXLLayout.TapInfo): Boolean {
+                    if(onTap(PointF(info.x, info.y))) return true
                     return left.listener.onTap(PointF(info.x, info.y))
                 }
             })
@@ -83,6 +102,7 @@ class R2FXLPageFragment : Fragment() {
             r2FXLLayout.addOnDoubleTapListener(R2FXLOnDoubleTapListener(true))
             r2FXLLayout.addOnTapListener(object : R2FXLLayout.OnTapListener {
                 override fun onTap(view: R2FXLLayout, info: R2FXLLayout.TapInfo): Boolean {
+                    if(onTap(PointF(info.x, info.y))) return true
                     return webview.listener.onTap(PointF(info.x, info.y))
                 }
             })
