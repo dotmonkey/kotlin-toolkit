@@ -40,6 +40,18 @@ class R2PagerAdapter internal constructor(val fm: FragmentManager, private val r
         return nextFragment
     }
 
+    fun getUrl(item:Int): String? {
+        when(val res = resources[item]){
+            is PageResource.EpubFxl->{
+                return res.url1
+            }
+            is PageResource.EpubReflowable->{
+               return res.url
+            }
+        }
+        return null
+    }
+
     override fun setPrimaryItem(container: ViewGroup, position: Int, `object`: Any) {
         if (getCurrentFragment() !== `object`) {
             currentFragment = `object` as Fragment

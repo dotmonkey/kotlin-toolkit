@@ -185,6 +185,31 @@ class EpubNavigatorFragment private constructor(
         preferences = context.getSharedPreferences("org.readium.r2.settings", Context.MODE_PRIVATE)
     }
 
+    fun recreate(){
+        val url = adapter.getUrl(resourcePager.currentItem)
+        val resource = if(landscape)  resourcesDouble else resourcesSingle
+        var index = resource.indexOfFirst {
+            when (it) {
+                is PageResource.EpubFxl -> {
+                    it.url1==url || it.url2==url
+                }
+                is PageResource.EpubReflowable -> {
+                    it.url==url
+                }
+                else -> {
+                    false
+                }
+            }
+        }
+        if(index<0) index = 0
+        adapter = if(landscape){
+            R2PagerAdapter(childFragmentManager, resourcesDouble)
+        }else{
+            R2PagerAdapter(childFragmentManager, resourcesSingle)
+        }
+        resourcePager.adapter = adapter
+        resourcePager.currentItem = index
+    }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         currentActivity = requireActivity()
         _binding = ActivityR2ViewpagerBinding.inflate(inflater, container, false)
