@@ -630,6 +630,10 @@ class EpubNavigatorFragment private constructor(
         }
     }
 
+    val isFixed:Boolean
+    get() {
+        return publication.metadata.presentation.layout == EpubLayout.FIXED
+    }
     override fun goForward(animated: Boolean, completion: () -> Unit): Boolean {
         if (publication.metadata.presentation.layout == EpubLayout.FIXED) {
             return goToNextResource(animated, completion)
@@ -786,6 +790,7 @@ class EpubNavigatorFragment private constructor(
         fulfill(publication.tableOfContents).toMap()
     }
     suspend fun updatePosition(loc: Locator): Locator {
+        if(currentWebView==null) return loc
         val json = currentWebView!!.runJavaScriptSuspend("endao.currentPosition()")
         if(json=="null") return loc
         val o = JSONObject(json)
@@ -807,7 +812,13 @@ class EpubNavigatorFragment private constructor(
             // item to reflect the current scroll position.
             currentFragment?.webView?.updateCurrentItem()
 
-            val resource = publication.readingOrder[resourcePager.currentItem]
+            val href = adapter.getUrl(resourcePager.currentItem)
+            //val resource = publication.readingOrder[resourcePager.currentItem]
+            val resource = if(href==""){
+                publication.readingOrder[0]
+            }else{
+                publication.readingOrder.first { it.withBaseUrl(baseUrl).href==href }
+            }
             val progression = currentFragment?.webView?.progression?.coerceIn(0.0, 1.0) ?: 0.0
             val positions = publication.positionsByResource[resource.href]?.takeIf { it.isNotEmpty() }
                     ?: return@launch
