@@ -88,6 +88,9 @@ open class R2BasicWebView(context: Context, attrs: AttributeSet) : WebView(conte
         setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
     }
 
+    init{
+        settings.defaultFontSize = 14
+    }
     /** Computes the current progression in the resource. */
     val progression: Double get() =
         if (scrollMode) {
