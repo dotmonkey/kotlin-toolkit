@@ -52,6 +52,7 @@ import org.readium.r2.shared.extensions.addPrefix
 import org.readium.r2.shared.extensions.tryOrLog
 import org.readium.r2.shared.publication.*
 import org.readium.r2.shared.publication.epub.EpubLayout
+import org.readium.r2.shared.publication.presentation.Presentation
 import org.readium.r2.shared.publication.presentation.presentation
 import org.readium.r2.shared.publication.services.isRestricted
 import org.readium.r2.shared.publication.services.positionsByReadingOrder
@@ -187,7 +188,7 @@ class EpubNavigatorFragment private constructor(
 
     fun recreate(){
         val url = adapter.getUrl(resourcePager.currentItem)
-        val resource = if(landscape)  resourcesDouble else resourcesSingle
+        val resource = if(useTwoColumn)  resourcesDouble else resourcesSingle
         var index = resource.indexOfFirst {
             when (it) {
                 is PageResource.EpubFxl -> {
@@ -202,13 +203,17 @@ class EpubNavigatorFragment private constructor(
             }
         }
         if(index<0) index = 0
-        adapter = if(landscape){
+        adapter = if(useTwoColumn){
             R2PagerAdapter(childFragmentManager, resourcesDouble)
         }else{
             R2PagerAdapter(childFragmentManager, resourcesSingle)
         }
         resourcePager.adapter = adapter
         resourcePager.currentItem = index
+    }
+    val useTwoColumn:Boolean
+    get() {
+        return  landscape && publication.metadata.presentation.spread!=Presentation.Spread.NONE
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         currentActivity = requireActivity()
@@ -276,7 +281,7 @@ class EpubNavigatorFragment private constructor(
                 this.resourcesDouble = resourcesDouble
 
                 resourcePager.type = Publication.TYPE.FXL
-                adapter = if(landscape){
+                adapter = if(useTwoColumn){
                     R2PagerAdapter(childFragmentManager, resourcesDouble)
                 }else{
                     R2PagerAdapter(childFragmentManager, resourcesSingle)
@@ -398,7 +403,7 @@ class EpubNavigatorFragment private constructor(
             setCurrent(resourcesSingle)
         } else {
 
-            if(landscape){
+            if(useTwoColumn){
                 setCurrent(resourcesDouble)
             }else{
                 setCurrent(resourcesSingle)
