@@ -50,6 +50,12 @@ internal class PublicationFactory(
 
     private val itemrefByIdref = spine.itemrefs.associateBy(Itemref::idref)
 
+    fun appendDummyEnd(readingOrder: List<Link>): List<Link> {
+        val mut = readingOrder.toMutableList()
+        val href = "file:///android_asset/endao/html/finished.html"
+        mut.add(Link(href,"application/xhtml+xml"))
+        return mut
+    }
     fun create(): Manifest {
         // Compute metadata
         val metadata = pubMetadata.metadata()
@@ -80,7 +86,7 @@ internal class PublicationFactory(
         return Manifest(
             metadata = metadata,
             links = metadataLinks,
-            readingOrder = readingOrder,
+            readingOrder = appendDummyEnd(readingOrder),
             resources = resources,
             tableOfContents = toc,
             subcollections = subcollections
