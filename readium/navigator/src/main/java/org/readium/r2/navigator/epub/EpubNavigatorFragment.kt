@@ -799,8 +799,15 @@ class EpubNavigatorFragment private constructor(
         val json = currentWebView!!.runJavaScriptSuspend("endao.currentPosition()")
         if(json=="null") return loc
         val o = JSONObject(json)
-        val oo = Locator.Locations.fromJSON(o)
-        val locations = loc.locations.copy(otherLocations = oo.otherLocations)
+        val orig = loc.locations.toJSON()
+        val oo = o["locations"] as JSONObject
+        for(k in oo.keys()){
+            orig.put(k,oo.get(k))
+        }
+        val locations = Locator.Locations.fromJSON(orig)
+        //println("updatePosition(${now.toJSON()})")
+        //val oo = Locator.Locations.fromJSON(o["locations"] as JSONObject)
+        //val locations = loc.locations.copy(otherLocations = oo.otherLocations)
         return loc.copy(locations = locations)
     }
     private fun notifyCurrentLocation() {
