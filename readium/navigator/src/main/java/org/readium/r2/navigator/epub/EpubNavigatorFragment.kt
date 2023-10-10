@@ -77,6 +77,8 @@ open class WebViewCallback{
     open fun handleTextAction(type: String, data: String) {
     }
     open fun fullscreen(){}
+    open fun toggleFinished(){}
+    open fun showCommentEditor(){}
     open fun fontSizeChanged(wv:R2WebView){}
     open fun onBookEnd(activity: Activity){}
 }
@@ -107,7 +109,8 @@ class EpubNavigatorFragment private constructor(
          * Provide one if you want to customize the selection context menu items.
          */
         var selectionActionModeCallback: ActionMode.Callback? = null,
-        var webViewCallback: WebViewCallback? = null
+        var webViewCallback: WebViewCallback? = null,
+        var bookId:Int = -1
     )
 
     interface PaginationListener {
@@ -796,6 +799,7 @@ class EpubNavigatorFragment private constructor(
     }
     suspend fun updatePosition(loc: Locator): Locator {
         if(currentWebView==null) return loc
+        if(currentFragment?.isFinishedPage==true) return loc
         val json = currentWebView!!.runJavaScriptSuspend("endao.currentPosition()")
         if(json=="null") return loc
         val o = JSONObject(json)

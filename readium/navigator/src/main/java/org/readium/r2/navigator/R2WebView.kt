@@ -15,9 +15,6 @@ import android.graphics.Rect
 import android.net.Uri
 import android.util.AttributeSet
 import android.view.*
-import android.view.KeyEvent
-import android.view.View
-import android.view.ViewGroup
 import android.view.animation.Interpolator
 import android.webkit.JavascriptInterface
 import android.widget.EdgeEffect
@@ -72,6 +69,14 @@ class R2WebView(context: Context, attrs: AttributeSet) : R2BasicWebView(context,
             val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
             startActivity(context,browserIntent,null)
         }
+    }
+    @JavascriptInterface
+    fun toggleFinished(){
+        webViewCallback?.toggleFinished()
+    }
+    @JavascriptInterface
+    fun showCommentEditor(){
+        webViewCallback?.showCommentEditor()
     }
 
     @android.webkit.JavascriptInterface

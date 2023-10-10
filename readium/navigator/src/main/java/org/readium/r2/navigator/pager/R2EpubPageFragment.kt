@@ -43,6 +43,7 @@ import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.publication.ReadingProgression
 import org.readium.r2.shared.publication.html.domRange
 import org.readium.r2.shared.publication.html.partialCfi
+import org.readium.r2.shared.publication.isFinished
 import java.io.IOException
 import java.io.InputStream
 import java.util.*
@@ -136,6 +137,10 @@ class R2EpubPageFragment : Fragment() {
         return if (resourceId > 0) resources.getDimensionPixelSize(resourceId) else ceil((if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) 24 else 25) * resources.displayMetrics.density)
             .toInt()
     }
+    val isFinishedPage:Boolean
+        get() {
+            return resourceUrl=="http://localhost/android_asset/endao/html/finished.html"
+        }
     fun layoutParam(): String {
         val obj = JSONObject()
         val loc = ConfigurationCompat.getLocales(resources.configuration)[0]
@@ -143,6 +148,13 @@ class R2EpubPageFragment : Fragment() {
         obj.put("language", getLocaleName(loc))
         obj.put("progressStart", progressRange.start)
         obj.put("progressEnd", progressRange.endInclusive)
+        if(isFinishedPage){
+            val epubNavigator = requireNotNull(webView?.navigator as? EpubNavigatorFragment)
+            val locator = epubNavigator.currentLocator.value
+            obj.put("finished",locator.isFinished())
+            val bid = epubNavigator.config.bookId
+            obj.put("bookId",bid)
+        }
         return obj.toString(0)
     }
     @SuppressLint("SetJavaScriptEnabled")

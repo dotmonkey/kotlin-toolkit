@@ -281,3 +281,16 @@ data class LocatorCollection(
         }
     }
 }
+
+fun Locator.setFinished(v:Boolean){
+    val json = locations.toJSON()
+    json.put("hasFinished",if(v) 1 else 0)
+    locations = Locator.Locations.fromJSON(json)
+    //val mm = locations.otherLocations.toMutableMap()
+    //mm["hasFinished"] = if(v) 1 else 0
+    //locations = locations.copy(otherLocations = mm)
+}
+fun Locator.isFinished():Boolean{
+    val mm = locations.otherLocations
+    return mm["hasFinished"]==1
+}
