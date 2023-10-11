@@ -44,6 +44,7 @@ import org.readium.r2.shared.publication.ReadingProgression
 import org.readium.r2.shared.publication.html.domRange
 import org.readium.r2.shared.publication.html.partialCfi
 import org.readium.r2.shared.publication.isFinished
+import org.readium.r2.shared.publication.urlForFinishedPage
 import java.io.IOException
 import java.io.InputStream
 import java.util.*
@@ -139,7 +140,7 @@ class R2EpubPageFragment : Fragment() {
     }
     val isFinishedPage:Boolean
         get() {
-            return resourceUrl=="http://localhost/android_asset/endao/html/finished.html"
+            return resourceUrl== urlForFinishedPage//"http://localhost/android_asset/endao/html/finished.html"
         }
     fun layoutParam(): String {
         val obj = JSONObject()

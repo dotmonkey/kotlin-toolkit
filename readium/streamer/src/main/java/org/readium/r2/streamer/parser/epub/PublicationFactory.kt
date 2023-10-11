@@ -52,7 +52,7 @@ internal class PublicationFactory(
 
     fun appendDummyEnd(readingOrder: List<Link>): List<Link> {
         val mut = readingOrder.toMutableList()
-        val href = "http://localhost/android_asset/endao/html/finished.html"
+        val href = urlForFinishedPage//"http://localhost/android_asset/endao/html/finished.html"
         mut.add(Link(href,"application/xhtml+xml"))
         return mut
     }

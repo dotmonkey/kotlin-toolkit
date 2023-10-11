@@ -28,7 +28,7 @@ import java.io.File
  * representation.
  */
 typealias LinkHrefNormalizer = (String) -> String
-
+val urlForFinishedPage = "http://localhost/android_asset/endao/html/finished.html"
 /**
  * Default href normalizer for [Link], doing nothing.
  */
