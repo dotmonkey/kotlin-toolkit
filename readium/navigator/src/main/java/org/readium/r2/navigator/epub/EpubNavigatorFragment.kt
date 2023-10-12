@@ -169,7 +169,12 @@ class EpubNavigatorFragment private constructor(
         return fragments.map { it.webView!! }
     }
     fun progressRange(link: Link): ClosedFloatingPointRange<Double> {
-        val idx = publication.readingOrder.indexOf(link)
+        var idx = publication.readingOrder.indexOf(link)
+        if(idx<0) {
+            idx = publication.readingOrder.indexOfFirst {
+                it.href == link.href
+            }
+        }
         if(idx<0){
             error("")
         }

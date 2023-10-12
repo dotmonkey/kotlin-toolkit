@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import org.readium.r2.shared.publication.Link
+import org.readium.r2.shared.publication.urlForFinishedPage
 
 
 class R2PagerAdapter internal constructor(val fm: FragmentManager, private val resources: List<PageResource>) : R2FragmentPagerAdapter(fm) {
@@ -61,8 +62,15 @@ class R2PagerAdapter internal constructor(val fm: FragmentManager, private val r
         super.setPrimaryItem(container, position, `object`)
     }
 
-    override fun getItem(position: Int): Fragment =
-        when (val resource = resources[position]) {
+    override fun getItem(position: Int): Fragment {
+        if(position==resources.size-1){
+            val rsc = resources[position] as? PageResource.EpubFxl
+            if(rsc!=null){
+                val l=Link(rsc.url1)
+                return R2EpubPageFragment.newInstance(l.href,l, 0)
+            }
+        }
+        return when (val resource = resources[position]) {
             is PageResource.EpubReflowable -> {
                 R2EpubPageFragment.newInstance(resource.url, resource.link, positionCount = resource.positionCount)
             }
@@ -79,6 +87,7 @@ class R2PagerAdapter internal constructor(val fm: FragmentManager, private val r
                     }
             }
         }
+    }
 
     override fun getCount(): Int {
         return resources.size
