@@ -806,6 +806,9 @@ class EpubNavigatorFragment private constructor(
         val orig = loc.locations.toJSON()
         val oo = o["locations"] as JSONObject
         for(k in oo.keys()){
+            if(isFixed && k=="totalProgression"){
+                continue
+            }
             orig.put(k,oo.get(k))
         }
         val locations = Locator.Locations.fromJSON(orig)
