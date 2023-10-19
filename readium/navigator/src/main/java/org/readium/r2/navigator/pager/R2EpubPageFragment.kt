@@ -152,7 +152,7 @@ class R2EpubPageFragment : Fragment() {
         if(isFinishedPage){
             val epubNavigator = requireNotNull(webView?.navigator as? EpubNavigatorFragment)
             val locator = epubNavigator.currentLocator.value
-            obj.put("finished",locator.isFinished())
+            obj.put("finished", epubNavigator.config.finished)
             val bid = epubNavigator.config.bookId
             obj.put("bookId",bid)
         }

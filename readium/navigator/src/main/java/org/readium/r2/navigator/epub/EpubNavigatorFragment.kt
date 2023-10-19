@@ -110,7 +110,8 @@ class EpubNavigatorFragment private constructor(
          */
         var selectionActionModeCallback: ActionMode.Callback? = null,
         var webViewCallback: WebViewCallback? = null,
-        var bookId:Int = -1
+        var bookId:Int = -1,
+        var finished:Boolean = false
     )
 
     interface PaginationListener {
