@@ -387,6 +387,8 @@ class R2EpubPageFragment : Fragment() {
 
             var sc = "document.documentElement.style.paddingTop=($top/window.devicePixelRatio)+\"px\";"
             sc += "document.documentElement.style.paddingBottom=($bottom/window.devicePixelRatio)+\"px\";"
+            sc+="var tmp=($top+$bottom)/window.devicePixelRatio;"
+            sc += "document.documentElement.style.setProperty('--RS__maxMediaHeight', 'calc(100vh - '+tmp+'px)');"
             webView?.evaluateJavascript(sc){}
             //containerView.setPadding(0, top, 0, bottom)
         }
