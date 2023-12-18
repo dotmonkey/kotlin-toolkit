@@ -173,7 +173,9 @@ class EpubNavigatorFragment private constructor(
         var idx = publication.readingOrder.indexOf(link)
         if(idx<0) {
             idx = publication.readingOrder.indexOfFirst {
-                it.href == link.href
+                val aa = it.withBaseUrl(baseUrl).href == link.href
+                val ok = it.href == link.href
+                aa || ok
             }
         }
         if(idx<0){
