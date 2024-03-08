@@ -10,6 +10,7 @@
 package org.readium.r2.lcp.service
 
 import android.net.Uri
+import co.endao.network.SecureConnection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.readium.r2.lcp.LcpException
@@ -46,8 +47,8 @@ internal class NetworkService {
             try {
                 @Suppress("NAME_SHADOWING")
                 val url = URL(Uri.parse(url).buildUpon().appendQueryParameters(parameters).build().toString())
-
-                val connection = url.openConnection() as HttpURLConnection
+                //println("fetch $url")
+                val connection = SecureConnection.openUrl(url)//url.openConnection() as HttpURLConnection
                 connection.requestMethod = method.rawValue
                 if (timeout != null) {
                     connection.connectTimeout = timeout.inWholeMilliseconds.toInt()
