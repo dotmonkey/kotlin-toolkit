@@ -42,6 +42,7 @@ import org.readium.r2.shared.publication.*
 import timber.log.Timber
 import java.net.UnknownHostException
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
 /**
@@ -77,8 +78,8 @@ class ExoMediaPlayer(
     }
 
     private val player: ExoPlayer = SimpleExoPlayer.Builder(context)
-        .setSeekBackIncrementMs(Duration.seconds(30).inWholeMilliseconds)
-        .setSeekForwardIncrementMs(Duration.seconds(30).inWholeMilliseconds)
+        .setSeekBackIncrementMs(30.seconds.inWholeMilliseconds)
+        .setSeekForwardIncrementMs(30.seconds.inWholeMilliseconds)
         .setMediaSourceFactory(DefaultMediaSourceFactory(dataSourceFactory))
         .setAudioAttributes(AudioAttributes.Builder()
             .setContentType(C.CONTENT_TYPE_MUSIC)
@@ -158,7 +159,7 @@ class ExoMediaPlayer(
         val readingOrder = publication.readingOrder
         val index = readingOrder.indexOfFirstWithHref(locator.href) ?: 0
 
-        val duration = readingOrder[index].duration?.let { Duration.seconds(it) }
+        val duration = readingOrder[index].duration?.let { it.seconds }
         val time = locator.locations.timeWithDuration(duration)
         player.seekTo(index, time?.inWholeMilliseconds ?: 0)
     }

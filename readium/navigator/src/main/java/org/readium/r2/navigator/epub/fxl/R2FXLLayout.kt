@@ -296,7 +296,7 @@ class R2FXLLayout : FrameLayout {
             }
         }
 
-        override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
+        override fun onScroll(e1: MotionEvent?, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
             var consumed = false
             if (e2.pointerCount == 1 && !scaleDetector!!.isInProgress) {
                 // only drag if we have one pointer and aren't already scaling
@@ -315,7 +315,7 @@ class R2FXLLayout : FrameLayout {
             return consumed
         }
 
-        override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
+        override fun onFling(e1: MotionEvent?, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
             val scale = scale
             val newScale = NumberUtils.clamp(minScale, scale, maxScale)
             if (NumberUtils.isEqual(newScale, scale)) {

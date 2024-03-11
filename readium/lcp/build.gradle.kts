@@ -15,10 +15,10 @@ plugins {
 
 android {
 
-    compileSdk = 33
+    compileSdk = 34
     defaultConfig {
         minSdk = 21
-        targetSdk = 33
+        targetSdk = 34
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     compileOptions {
@@ -83,7 +83,7 @@ dependencies {
     compileOnly ("com.github.pengrad:jdk9-deps:1.0")
 
     // Room database
-    val roomVersion = "2.4.1"
+    val roomVersion = "2.6.1"
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")

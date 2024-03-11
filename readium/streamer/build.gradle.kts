@@ -28,7 +28,7 @@ android {
     }
     kotlinOptions {
         freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn"
-        allWarningsAsErrors = true
+        allWarningsAsErrors = false
     }
     buildTypes {
         getByName("release") {

@@ -49,6 +49,9 @@ class R2PagerAdapter internal constructor(val fm: FragmentManager, private val r
             is PageResource.EpubReflowable->{
                return res.url
             }
+            else->{
+                return null
+            }
         }
         return null
     }

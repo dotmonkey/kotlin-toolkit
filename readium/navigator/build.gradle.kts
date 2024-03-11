@@ -16,11 +16,11 @@ android {
     // FIXME: This doesn't pass the lint because some resources don"t start with r2_ yet. We need to rename all resources for the next major version.
 //    resourcePrefix "r2_"
 
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 33
+        targetSdk = 34
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     compileOptions {

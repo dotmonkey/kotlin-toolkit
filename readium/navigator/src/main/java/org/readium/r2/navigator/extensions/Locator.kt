@@ -13,7 +13,7 @@ import org.readium.r2.shared.publication.Locator
 import java.util.*
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
-import kotlin.time.seconds
+import kotlin.time.Duration.Companion.seconds
 
 // FIXME: This should be in r2-shared once this public API is specified.
 
@@ -69,5 +69,5 @@ internal val Locator.Locations.time: Duration? get() =
  */
 @OptIn(ExperimentalTime::class)
 internal fun Locator.Locations.timeWithDuration(duration: Duration?): Duration? =
-    let(duration, progression) { d, p -> (p * d.inSeconds).seconds }
+    let(duration, progression) { d, p -> (p * d.inWholeSeconds).seconds }
         ?: time
