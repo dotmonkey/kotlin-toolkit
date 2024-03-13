@@ -29,6 +29,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.webkit.WebViewClientCompat
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.json.JSONArray
 import org.json.JSONObject
 import org.readium.r2.navigator.R
 import org.readium.r2.navigator.R2BasicWebView
@@ -36,6 +37,7 @@ import org.readium.r2.navigator.R2WebView
 import org.readium.r2.navigator.databinding.ViewpagerFragmentEpubBinding
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
 import org.readium.r2.navigator.extensions.htmlId
+import org.readium.r2.navigator.extensions.withBaseUrl
 import org.readium.r2.shared.SCROLL_REF
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
@@ -47,6 +49,7 @@ import org.readium.r2.shared.publication.isFinished
 import org.readium.r2.shared.publication.urlForFinishedPage
 import java.io.IOException
 import java.io.InputStream
+import java.net.URI
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.ceil
@@ -124,6 +127,29 @@ class R2EpubPageFragment : Fragment() {
         val pub = navigatorFragment.publication
         return pub.getTitle(link!!.href) ?: ""
     }
+    val fragementsForThisFile:List<Pair<String,String>>
+        get() {
+            val navigatorFragment = parentFragment as EpubNavigatorFragment
+            val pub = navigatorFragment.publication
+            val res = mutableListOf<Pair<String,String>>()
+            val url = URI(link!!.href)
+            for(it in pub.tableOfContents){
+                findFragements(url.path,it,res)
+            }
+            return res
+        }
+    fun findFragements(path:String,l:Link,res:MutableList<Pair<String,String>>){
+        val url = URI(l.href)
+        if(url.path==path){
+            val frag = url.fragment
+            if(frag!=null){
+                res.add(Pair(frag,l.title ?: ""))
+            }
+        }
+        for(it in l.children){
+            findFragements(path,it,res)
+        }
+    }
     private lateinit var containerView: View
     private lateinit var preferences: SharedPreferences
 
@@ -156,6 +182,14 @@ class R2EpubPageFragment : Fragment() {
             val bid = epubNavigator.config.bookId
             obj.put("bookId",bid)
         }
+        val arr = JSONArray()
+        for(it in fragementsForThisFile){
+            val o = JSONObject()
+            o.put("id",it.first)
+            o.put("title",it.second)
+            arr.put(o)
+        }
+        obj.put("fragments",arr)
         return obj.toString(0)
     }
     @SuppressLint("SetJavaScriptEnabled")
