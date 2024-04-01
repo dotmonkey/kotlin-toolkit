@@ -605,6 +605,9 @@ class R2WebView(context: Context, attrs: AttributeSet) : R2BasicWebView(context,
     }
 
     override fun computeScroll() {
+        if (scrollMode) {
+            return super.computeScroll()
+        }
         mIsScrollStarted = true
         if (!mScroller!!.isFinished && mScroller!!.computeScrollOffset()) {
             val oldX = scrollX
@@ -818,11 +821,21 @@ class R2WebView(context: Context, attrs: AttributeSet) : R2BasicWebView(context,
 
                     if (scrollMode) {
                         val totalDelta = (y - mInitialMotionY).toInt()
-                        if (abs(totalDelta) < 200) {
+                        val dx = (x - mInitialMotionX).toInt()
+                        val hori = totalDelta.absoluteValue<dx.absoluteValue
+                        if (abs(totalDelta) < 200 && hori) {
                             if (mInitialMotionX < x) {
                                 scrollLeft(animated = true)
                             } else if (mInitialMotionX > x) {
                                 scrollRight(animated = true)
+                            }
+                        }else{
+                            if(!hori){
+                                if(!canScrollVertically(-1)){
+                                    scrollLeft(animated = false)
+                                }else if(!canScrollVertically(1)){
+                                    scrollRight(animated = false)
+                                }
                             }
                         }
                     } else {

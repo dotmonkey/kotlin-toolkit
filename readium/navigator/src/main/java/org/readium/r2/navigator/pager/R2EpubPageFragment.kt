@@ -210,7 +210,9 @@ class R2EpubPageFragment : Fragment() {
         webView.listener = navigatorFragment.webViewListener
         webView.preferences = preferences
 
-        //webView.setScrollMode(preferences.getBoolean(SCROLL_REF, false))
+        if(!navigatorFragment.isFixed){
+            webView.setScrollMode(preferences.getBoolean(SCROLL_REF, false))
+        }
         webView.settings.javaScriptEnabled = true
         webView.isVerticalScrollBarEnabled = false
         webView.isHorizontalScrollBarEnabled = false
@@ -412,8 +414,10 @@ class R2EpubPageFragment : Fragment() {
                 }
             }
 
-            val scrollMode = preferences.getBoolean(SCROLL_REF, false)
-            if (!scrollMode) {
+            var scrollMode = preferences.getBoolean(SCROLL_REF, false)
+            val navigatorFragment = parentFragment as EpubNavigatorFragment
+            if(navigatorFragment.isFixed) scrollMode = false
+            if (!navigatorFragment.isFixed) {
                 //val margin = resources.getDimension(R.dimen.r2_navigator_epub_vertical_padding).toInt()
                 top += resources.getDimension(R.dimen.r2_navigator_epub_vertical_padding_top).toInt()
                 bottom += resources.getDimension(R.dimen.r2_navigator_epub_vertical_padding_bottom).toInt()

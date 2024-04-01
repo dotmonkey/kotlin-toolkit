@@ -327,7 +327,7 @@ class EpubNavigatorFragment private constructor(
 //                if (publication.metadata.presentation.layout == EpubLayout.REFLOWABLE) {
 //                    resourcePager.disableTouchEvents = true
 //                }
-                if (preferences.getBoolean(SCROLL_REF, false)) {
+                if (preferences.getBoolean(SCROLL_REF, false) && !isFixed) {
                     if (currentPagerPosition < position) {
                         // handle swipe LEFT
                         currentFragment?.webView?.scrollToStart()
@@ -599,6 +599,7 @@ class EpubNavigatorFragment private constructor(
 
         override fun onProgressionChanged() {
             notifyCurrentLocation()
+            currentWebView?.evaluateJavascript("endao.onProgressionChanged()",null)
         }
 
         override fun onHighlightActivated(id: String) {
@@ -862,7 +863,7 @@ class EpubNavigatorFragment private constructor(
             if (locator == _currentLocator.value) {
                 return@launch
             }
-            val real = updatePosition(locator)
+            val real = if(currentWebView==null) locator else updatePosition(locator)
 
             _currentLocator.value = real
             navigatorDelegate?.locationDidChange(navigator = navigator, locator = real)
