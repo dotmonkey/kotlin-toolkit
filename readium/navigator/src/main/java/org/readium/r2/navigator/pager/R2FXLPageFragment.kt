@@ -151,6 +151,14 @@ class R2FXLPageFragment : Fragment() {
         webView.addJavascriptInterface(webView, "Android")
         val navigatorFragment = parentFragment as EpubNavigatorFragment
         val cb = navigatorFragment.config.webViewCallback
+        var lcr = 0
+        if(secondResourceUrl!=null){
+            if(resourceUrl==secondResourceUrl){
+                lcr = 1
+            }else{
+                lcr = -1
+            }
+        }
         webView.webViewClient = object : WebViewClientCompat() {
 
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean =
@@ -176,7 +184,7 @@ class R2FXLPageFragment : Fragment() {
                 while(p!=null){
                     if(p is R2FXLLayout){
                         val col = webViews.size
-                        view.evaluateJavascript("endao.updateScale(${p.width/col},${p.height})"){
+                        view.evaluateJavascript("endao.updateScale(${p.width/col},${p.height},$lcr)"){
                         }
                         break
                     }
