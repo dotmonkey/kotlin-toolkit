@@ -831,9 +831,9 @@ class R2WebView(context: Context, attrs: AttributeSet) : R2BasicWebView(context,
                             }
                         }else{
                             if(!hori){
-                                if(!canScrollVertically(-1)){
+                                if(!canScrollVertically(-1) && y> mInitialMotionY){
                                     scrollLeft(animated = false)
-                                }else if(!canScrollVertically(1)){
+                                }else if(!canScrollVertically(1) && y<mInitialMotionY){
                                     scrollRight(animated = false)
                                 }
                             }
