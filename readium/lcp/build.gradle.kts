@@ -36,6 +36,9 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android.txt"))
         }
     }
+    packagingOptions {
+        resources.excludes.add("META-INF/*")
+    }
 }
 /*
 afterEvaluate {
@@ -80,7 +83,7 @@ dependencies {
     implementation("joda-time:joda-time:2.10.13")
     implementation("org.zeroturnaround:zt-zip:1.14")
     implementation("androidx.browser:browser:1.4.0")
-    compileOnly ("com.github.pengrad:jdk9-deps:1.0")
+    //compileOnly ("com.github.pengrad:jdk9-deps:1.0")
 
     // Room database
     val roomVersion = "2.6.1"
